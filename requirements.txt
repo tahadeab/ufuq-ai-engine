@@ -1,0 +1,39 @@
+# Ufuq AI Engine — المتطلبات الأساسية
+# التثبيت المحلي: pip install -r requirements.txt
+
+# ── الواجهة ────────────────────────────────────────────────
+fastapi==0.115.12
+uvicorn[standard]==0.34.3
+pydantic==2.10.6
+pydantic-settings==2.7.1
+python-multipart==0.0.20
+httpx==0.28.1
+
+# ── LLM المحلي (Ollama) ────────────────────────────────────
+ollama==0.4.7
+
+# ── Document Intelligence ─────────────────────────────────
+docling==2.22.0
+
+# ── Embeddings & Reranker ─────────────────────────────────
+sentence-transformers==3.4.1
+transformers==4.48.3
+torch==2.6.0
+
+# ── Vector DB ─────────────────────────────────────────────
+qdrant-client==1.13.2
+
+# ── Database ──────────────────────────────────────────────
+sqlalchemy[asyncio]==2.0.38
+asyncpg==0.30.0
+psycopg2-binary==2.9.10
+
+# ── Utilities ─────────────────────────────────────────────
+python-dotenv==1.0.1
+jsonschema==4.23.0
+pypdf==5.3.1
+
+# ── الاختبارات ────────────────────────────────────────────
+pytest==8.3.5
+pytest-asyncio==0.24.0
+pytest-mock==3.14.0

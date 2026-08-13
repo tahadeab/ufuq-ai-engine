@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.Python
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment (never commit secrets)
+.env
+
+# Runtime storage (uploaded files are local-only)
+storage/
+!storage/.gitkeep
+
+# Data files
+qdrant_storage/
+*.db
+*.sqlite
+
+# Testing / coverage
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Logs
+*.log
+
+# Type checkers
+.mypy_cache/
