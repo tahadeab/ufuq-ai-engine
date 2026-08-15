@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import unicodedata
 from typing import Any, Dict, List
 
 from app.rag.hybrid_search import _tokenize
@@ -90,6 +91,13 @@ def check_duplicate_concepts(concepts: List[Dict[str, Any]]) -> List[str]:
     return issues
 
 
+def _normalize_citation_text(value: str) -> str:
+    """Normalize PDF/Unicode artifacts before deterministic citation matching."""
+    value = unicodedata.normalize("NFKC", str(value or ""))
+    value = "".join(ch for ch in value if unicodedata.category(ch) not in {"Cf", "Cc"} or ch in {"\n", "\t"})
+    return re.sub(r"\s+", " ", value).strip()
+
+
 class CitationValidator:
     """تحقق حتمي من استشهادات الوحدات التعليمية."""
 
@@ -114,7 +122,13 @@ class CitationValidator:
                     continue
                 quote = (citation.get("quote") or "").strip()
                 text = str(chunk.get("text") or chunk.get("content") or "")
-                if not quote or quote not in text:
+                # PDF extraction may add bidi marks, compatibility forms,
+                # or line-break whitespace. Compare normalized text while
+                # preserving the requirement that the quote exists verbatim
+                # in the source content after extraction normalization.
+                normalized_quote = _normalize_citation_text(quote)
+                normalized_text = _normalize_citation_text(text)
+                if not normalized_quote or normalized_quote not in normalized_text:
                     issues.append(f"اقتباس غير مطابق للمقطع: {chunk_id}")
         return issues
 

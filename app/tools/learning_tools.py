@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import json
 import logging
+import re
+import unicodedata
 from typing import Any, Dict, List
 
 from app.llm.base import LLMMessage
@@ -82,7 +84,11 @@ async def generate_learning_path(
     for item in skeleton:
         text = enriched_by_id.get(item["module_id"], {})
         modules.append({**item, "title": text.get("title") or f"الوحدة {item['order']}", "description": text.get("description", ""), "learning_objectives": text.get("learning_objectives") or [f"فهم {cid}" for cid in item["concepts_covered"]], "estimated_hours": max(1.0, len(item["concepts_covered"]) * 0.5)})
-    payload = {"source_id": source_id, "title": source_title or "مسار التعلم", "description": "مسار مبني على الرسم المعرفي والاستشهادات الأصلية.", "modules": modules, "metadata": {"generation_method": "deterministic_graph_plus_llm_enrichment", "graph_validated": True}}
+    sample_text = " ".join(str(c.get("text") or c.get("content") or "") for c in chunks[:3])
+    language = "ar" if len(re.findall(r"[\u0600-\u06FF]", sample_text)) >= 8 else "en"
+    default_title = "خارطة التعلم" if language == "ar" else "Learning Roadmap"
+    default_description = ("مسار مبني على الرسم المعرفي والاستشهادات الأصلية." if language == "ar" else "A learning path grounded in the knowledge graph and original citations.")
+    payload = {"source_id": source_id, "title": source_title or default_title, "description": default_description, "modules": modules, "metadata": {"generation_method": "deterministic_graph_plus_llm_enrichment", "graph_validated": True, "language": language, "citation_count": sum(len(m.get("source_citations", [])) for m in modules)}}
     from app.knowledge.validator import CitationValidator
     CitationValidator(chunks, source_id).assert_valid(payload)
     return {"learning_path": payload}
@@ -216,7 +222,9 @@ async def generate_assessment(objectives: list, chunks: list) -> Dict[str, Any]:
 
 
 def _best_citation_quote(text: str, max_chars: int = 500) -> str:
-    """اختر اقتباساً قابلاً للقراءة، ولا تجعل علامات الصور دليلاً وحيداً."""
+    """اختر اقتباساً قابلاً للقراءة مع إزالة آثار PDF وUnicode غير المرئية."""
+    text = unicodedata.normalize("NFKC", str(text or ""))
+    text = "".join(ch for ch in text if unicodedata.category(ch) not in {"Cf", "Cc"} or ch in {"\n", "\t"})
     lines = []
     for line in str(text or "").splitlines():
         clean = line.strip()

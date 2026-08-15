@@ -91,8 +91,14 @@ class KnowledgeExtractor:
             heading_path = chunk.get("heading_path", "")
             if heading_path:
                 candidates.extend([x.strip() for x in str(heading_path).split(" > ") if x.strip()])
+            # Docling قد يعيد PDF كنص مسطح بلا عناوين؛ نستخدم الأسطر
+            # والعناوين القصيرة كمرشحات، مع حد أقصى يمنع تضخم الرسم.
+            flat_lines = [re.sub(r"\s+", " ", line).strip() for line in text.splitlines()]
+            candidates.extend(line for line in flat_lines if 3 <= len(line) <= 100)
+            if len(candidates) < 2:
+                candidates.extend(re.split(r"(?<=[.!؟])\s+", text))
             seen = set()
-            for name in candidates:
+            for name in candidates[:12]:
                 name = re.sub(r"\s+", " ", name).strip(" -*")
                 key = name.lower()
                 if key in seen or not name or len(name.split()) > 14:
