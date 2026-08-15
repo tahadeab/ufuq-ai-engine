@@ -63,11 +63,13 @@ from app.api.routes_jobs import router as jobs_router
 from app.api.routes_knowledge import router as knowledge_router
 from app.api.routes_rag import router as rag_router
 from app.api.routes_sources import router as sources_router
+from app.api.routes_exports import router as exports_router
 
 app.include_router(jobs_router)
 app.include_router(sources_router)
 app.include_router(rag_router)
 app.include_router(knowledge_router)
+app.include_router(exports_router)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 

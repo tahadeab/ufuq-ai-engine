@@ -52,13 +52,14 @@ async def run_job_background(job_id: str, request: JobCreateRequest) -> None:
     job_store = get_job_store()
     agent = get_agent()
 
-    await job_store.update(job_id, status="processing", state=AgentState.PLANNING)
+    await job_store.update(job_id, status="processing", state=AgentState.PLANNING, progress={"stage": "planning", "percent": 10, "stages": [{"id": "upload", "status": "done"}, {"id": "extraction", "status": "in_progress"}, {"id": "concepts", "status": "pending"}, {"id": "graph", "status": "pending"}, {"id": "roadmap", "status": "pending"}]})
     try:
         extra_context = {
             "document_title": request.document_title or "",
             "search_query": request.query or "",
             **(request.context or {}),
         }
+        await job_store.update(job_id, progress={"stage": "knowledge_processing", "percent": 45, "stages": [{"id": "upload", "status": "done"}, {"id": "extraction", "status": "done"}, {"id": "concepts", "status": "in_progress"}, {"id": "graph", "status": "pending"}, {"id": "roadmap", "status": "pending"}]})
         result = await agent.run_task(
             job_id=job_id,
             source_id=request.source_id,
@@ -66,10 +67,13 @@ async def run_job_background(job_id: str, request: JobCreateRequest) -> None:
             extra_context=extra_context,
         )
         await job_store.update_result(job_id, result)
+        if result.learning_path and result.learning_path.get("quality", {}).get("review_required"):
+            await job_store.update(job_id, status="review_required")
     except Exception as exc:
         await job_store.update(
-            job_id, status="failed",
+            job_id, status="failed", error="PROCESSING_FAILED",
             metrics={"error": str(exc)},
+            progress={"stage": "failed", "percent": 0, "stages": []},
         )
 
 

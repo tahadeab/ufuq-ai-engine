@@ -54,6 +54,9 @@ class Job(BaseModel):
     lessons: List[Dict[str, Any]] = Field(default_factory=list)
     assessments: List[Dict[str, Any]] = Field(default_factory=list)
     metrics: Dict[str, Any] = Field(default_factory=dict)
+    quality: Dict[str, Any] = Field(default_factory=dict)
+    progress: Dict[str, Any] = Field(default_factory=lambda: {"stage": "queued", "percent": 0, "stages": []})
+    version: int = 1
     review_comments: Optional[str] = None
     error: Optional[str] = None
     created_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
@@ -73,6 +76,8 @@ class JobResult(BaseModel):
     assessments: List[Dict[str, Any]] = Field(default_factory=list)
     citations: List[Dict[str, Any]] = Field(default_factory=list)
     metrics: Dict[str, Any] = Field(default_factory=dict)
+    quality: Dict[str, Any] = Field(default_factory=dict)
+    version: int = 1
 
 
 class JobCreateRequest(BaseModel):

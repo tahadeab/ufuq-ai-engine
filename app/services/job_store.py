@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 class JobStore:
     def __init__(self):
         self._jobs: Dict[str, Job] = {}
+        self._history: Dict[str, list] = {}
 
     async def save(self, job: Job) -> None:
         self._jobs[job.job_id] = job
@@ -48,6 +49,18 @@ class JobStore:
         job.lessons = result.lessons
         job.assessments = result.assessments
         job.metrics = result.metrics
+        job.quality = result.quality or (result.learning_path or {}).get("quality", {})
+        previous = self._history.setdefault(job.source_id, [])
+        job.version = len(previous) + 1
+        if job.learning_path:
+            previous.append({"version": job.version, "job_id": job.job_id, "created_at": job.updated_at, "learning_path": job.learning_path, "quality": job.quality})
+        job.progress = {"stage": "completed", "percent": 100, "stages": [
+            {"id": "upload", "status": "done"},
+            {"id": "extraction", "status": "done"},
+            {"id": "concepts", "status": "done"},
+            {"id": "graph", "status": "done"},
+            {"id": "roadmap", "status": "done"},
+        ]}
         job.updated_at = datetime.utcnow().isoformat()
 
     async def list_jobs(self, limit: int = 20) -> list:

@@ -1,8 +1,8 @@
 # Ufuq AI Engine
 
-**The AI Engine for the "Ufuq" (أُفق) Educational Platform** — Converts documents and learning sources into Knowledge Maps and personalized Learning Paths.
+**Ufuq Educational Roadmap Engine** — Converts documents and learning sources into auditable Knowledge Maps and personalized Learning Paths.
 
-**محرك الذكاء الاصطناعي لمنصة «أُفق» التعليمية** — يحوّل الملفات والمستندات إلى خرائط معرفية ومسارات تعلم مخصصة.
+**محرك أُفق التعليمي** — يحوّل المستندات والمصادر إلى خرائط معرفية ومسارات تعلم قابلة للمراجعة والتدقيق.
 
 | Field / البند | Value / القيمة |
 |---|---|
@@ -69,10 +69,19 @@ POST /jobs/{id}/review    → Human review (approve | revise | reject)
 POST /rag/search          → Hybrid RAG search with citations   / بحث RAG هجين
 GET  /knowledge/{source}  → Full knowledge graph               / الرسم المعرفي
 GET  /learning/{source}/path → Generated learning path         / مسار التعلم
+GET  /learning/{source}/review → Evidence and quality review    / مراجعة الأدلة والجودة
+GET  /learning/{source}/versions → Roadmap version history       / إصدارات المسار
+GET  /learning/{source}/export.json|md|pdf → Export formats      / التصدير
 GET  /mcp/tools           → Available MCP tools                / أدوات MCP
 GET  /health              → Health check                       / فحص الصحة
 GET  /docs                → Interactive Swagger UI             / واجهة توثيق تفاعلية
 ```
+
+## Quality, Review and Learning Features / الجودة والمراجعة والميزات التعليمية
+
+Every generated path includes deterministic quality signals for citation coverage, concept coverage, graph validity, unsupported claims, and review status. Each module exposes its source citations and learning objectives in the bilingual dashboard. The path also includes estimated hours and an initial weekly plan, while every regeneration is retained as a version in the in-memory job store.
+
+تتضمن كل خارطة مؤشرات حتمية لجودة الاستشهادات وتغطية المفاهيم وصحة الرسم والادعاءات غير المدعومة وحالة المراجعة. وتعرض الواجهة كل وحدة وأهدافها وأدلتها الأصلية، إضافة إلى مدة التعلم التقديرية والخطة الأسبوعية الأولية، مع حفظ الإصدارات السابقة أثناء تشغيل الخدمة.
 
 ## Local Setup / التشغيل المحلي (Docker)
 
@@ -116,7 +125,8 @@ No code changes needed — the factory builds the provider from settings only.
 ## Testing / الاختبارات
 
 ```bash
-pytest tests/unit -v                    # 98 unit tests (algorithms, schemas, Agent, RAG, tools)
+pytest -q                              # Full suite
+pytest tests/unit -v                    # Unit tests (algorithms, schemas, Agent, RAG, tools, quality)
 python tests/integration_test.py        # Full FastAPI integration tests
 ```
 
@@ -127,7 +137,7 @@ Algorithm tests are deterministic and require no LLM — they run instantly.
 ```text
 ufuq-ai-engine/
 ├── app/
-│   ├── api/            routes_jobs|sources|rag|knowledge.py
+│   ├── api/            routes_jobs|sources|rag|knowledge|exports.py
 │   ├── llm/            base | ollama_provider | openai_provider | gemini_provider | factory | prompts.py
 │   ├── ingestion/      docling_parser.py | chunker.py
 │   ├── embeddings/     model.py | service.py (GPU-aware loading/unloading)

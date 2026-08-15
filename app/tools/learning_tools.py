@@ -88,9 +88,14 @@ async def generate_learning_path(
     language = "ar" if len(re.findall(r"[\u0600-\u06FF]", sample_text)) >= 8 else "en"
     default_title = "خارطة التعلم" if language == "ar" else "Learning Roadmap"
     default_description = ("مسار مبني على الرسم المعرفي والاستشهادات الأصلية." if language == "ar" else "A learning path grounded in the knowledge graph and original citations.")
-    payload = {"source_id": source_id, "title": source_title or default_title, "description": default_description, "modules": modules, "metadata": {"generation_method": "deterministic_graph_plus_llm_enrichment", "graph_validated": True, "language": language, "citation_count": sum(len(m.get("source_citations", [])) for m in modules)}}
+    total_hours = round(sum(float(m.get("estimated_hours", 1.0)) for m in modules), 1)
+    weekly_plan = [{"week": index + 1, "module_ids": [m["module_id"]], "estimated_hours": m.get("estimated_hours", 1.0)} for index, m in enumerate(modules)]
+    payload = {"source_id": source_id, "title": source_title or default_title, "description": default_description, "modules": modules, "learning_summary": {"total_estimated_hours": total_hours, "weekly_plan": weekly_plan}, "metadata": {"generation_method": "deterministic_graph_plus_llm_enrichment", "graph_validated": True, "language": language, "citation_count": sum(len(m.get("source_citations", [])) for m in modules)}}
     from app.knowledge.validator import CitationValidator
     CitationValidator(chunks, source_id).assert_valid(payload)
+    from app.knowledge.quality import analyze_learning_path_quality
+    payload["quality"] = analyze_learning_path_quality(payload, chunks, sorted_graph, source_id)
+    payload["metadata"]["review_required"] = payload["quality"]["review_required"]
     return {"learning_path": payload}
 
 
