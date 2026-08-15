@@ -60,6 +60,7 @@ async def upload_source(file: UploadFile = File(...)) -> dict:
         texts = [p.get("text", "") for p in chunk_payloads]
         vectors = get_embedding_service().embed_texts(texts)
         await get_chunk_store().add_chunks(source_id, chunk_payloads, vectors)
+        get_embedding_service().release()
         register_parsed(source_id, parsed, chunks)
 
         _sources_meta[source_id] = {
@@ -102,6 +103,7 @@ async def add_source_url(payload: dict) -> dict:
         texts = [p.get("text", "") for p in chunk_payloads]
         vectors = get_embedding_service().embed_texts(texts)
         await get_chunk_store().add_chunks(source_id, chunk_payloads, vectors)
+        get_embedding_service().release()
         register_parsed(source_id, parsed, chunks)
         _sources_meta[source_id] = {
             "source_id": source_id,

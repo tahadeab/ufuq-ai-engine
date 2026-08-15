@@ -68,7 +68,9 @@ CONCEPT_EXTRACTION_SCHEMA: Dict[str, Any] = {
                     },
                     "confidence": {"type": "number", "minimum": 0, "maximum": 1},
                 },
-                "required": ["id", "name", "type", "definition", "source_chunk_ids"],
+                "required": [
+                    "id", "name", "type", "definition", "source_chunk_ids", "confidence"
+                ],
                 "additionalProperties": False,
             },
         },
@@ -88,7 +90,7 @@ CONCEPT_EXTRACTION_SCHEMA: Dict[str, Any] = {
                 },
                 "required": [
                     "source_concept_id", "relation",
-                    "target_concept_id", "evidence_chunk_ids",
+                    "target_concept_id", "evidence_chunk_ids", "confidence",
                 ],
                 "additionalProperties": False,
             },

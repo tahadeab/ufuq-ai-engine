@@ -222,6 +222,7 @@ class UfuqAgent:
             base["sorted_graph"] = memory.graph
             base["source_id"] = src
             base["source_title"] = memory.context.get("document_title", "")
+            base["chunks"] = memory.chunks
         if tool == "generate_lesson":
             base["lesson_spec"] = memory.context.get("lesson_spec", {
                 "title": "درس تمهيدي",

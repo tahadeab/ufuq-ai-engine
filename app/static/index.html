@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#08111f" />
+  <title>Ufuq AI Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/app.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">أ</div><div><strong>أُفق</strong><span>Ufuq AI Engine</span></div></div>
+      <div class="workspace"><span class="eyebrow" data-i18n="workspace">مساحة العمل</span><strong>Learning Studio</strong><span class="online"><i></i><span data-i18n="connected">متصل</span></span></div>
+      <nav class="nav">
+        <button class="nav-item active" data-view="overview"><span class="nav-icon">⌂</span><span data-i18n="overview">نظرة عامة</span></button>
+        <button class="nav-item" data-view="sources"><span class="nav-icon">▣</span><span data-i18n="sources">المصادر</span></button>
+        <button class="nav-item" data-view="jobs"><span class="nav-icon">◫</span><span data-i18n="jobs">المهام</span></button>
+        <button class="nav-item" data-view="roadmap"><span class="nav-icon">✦</span><span data-i18n="roadmap">خارطة التعلم</span></button>
+      </nav>
+      <div class="sidebar-bottom"><a href="/docs" target="_blank"><span>⌁</span><span data-i18n="developerDocs">وثائق المطورين</span></a><button id="themeBtn"><span>◐</span><span data-i18n="appearance">المظهر</span></button></div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar"><div><span class="breadcrumb" data-i18n="product">منصة أُفق التعليمية</span><h1 id="pageTitle" data-i18n="overview">نظرة عامة</h1></div><div class="top-actions"><button class="icon-btn" id="refreshBtn" title="Refresh">↻</button><button class="lang-btn" id="langBtn">EN</button><div class="avatar">T</div></div></header>
+      <div id="toast" class="toast"></div>
+      <section id="view-overview" class="view active-view">
+        <div class="hero"><div><span class="hero-kicker" data-i18n="heroKicker">محرك المعرفة الذكي</span><h2 data-i18n="heroTitle">حوّل مستنداتك إلى مسارات تعلم واضحة.</h2><p data-i18n="heroText">ارفع مصدراً، ودع أُفق يستخرج المفاهيم والعلاقات ويبني خارطة تعلم موثقة بالاستشهادات.</p><button class="primary-btn" data-view-target="sources"><span>＋</span><span data-i18n="addSource">إضافة مصدر</span></button></div><div class="hero-art"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="graph-lines">✦<span></span>◈<span></span>✧</div></div></div>
+        <div class="section-head"><div><span class="eyebrow" data-i18n="workspaceSnapshot">ملخص مساحة العمل</span><h3 data-i18n="atAGlance">كل شيء في مكان واحد</h3></div><button class="ghost-btn" data-view-target="jobs" data-i18n="viewAllJobs">عرض كل المهام</button></div>
+        <div class="stats-grid"><div class="stat-card"><div class="stat-icon purple">▣</div><div><span data-i18n="indexedSources">المصادر المفهرسة</span><strong id="statSources">—</strong></div></div><div class="stat-card"><div class="stat-icon blue">◫</div><div><span data-i18n="activeJobs">المهام النشطة</span><strong id="statJobs">—</strong></div></div><div class="stat-card"><div class="stat-icon green">✦</div><div><span data-i18n="completedPaths">مسارات جاهزة</span><strong id="statPaths">—</strong></div></div><div class="stat-card"><div class="stat-icon amber">◌</div><div><span data-i18n="health">حالة النظام</span><strong id="statHealth">—</strong></div></div></div>
+        <div class="dashboard-grid"><div class="panel"><div class="panel-head"><div><h3 data-i18n="recentJobs">آخر المهام</h3><p data-i18n="recentJobsSub">تابع تقدم التحليل وبناء المسارات.</p></div><button class="small-btn" data-view-target="jobs" data-i18n="seeAll">عرض الكل</button></div><div id="recentJobs" class="list"></div></div><div class="panel quick-panel"><div class="panel-head"><div><h3 data-i18n="quickStart">ابدأ بسرعة</h3><p data-i18n="quickStartSub">ثلاث خطوات لبناء أول خارطة.</p></div></div><div class="steps"><div><b>01</b><span data-i18n="stepOne">أضف مستنداً أو رابطاً</span></div><div><b>02</b><span data-i18n="stepTwo">شغّل تحليل المعرفة</span></div><div><b>03</b><span data-i18n="stepThree">راجع الخارطة والمصادر</span></div></div></div></div>
+      </section>
+      <section id="view-sources" class="view"><div class="page-intro"><div><span class="eyebrow" data-i18n="knowledgeLibrary">مكتبة المعرفة</span><h2 data-i18n="manageSources">إدارة المصادر</h2><p data-i18n="manageSourcesSub">أضف المستندات والروابط التي تريد تحويلها إلى معرفة قابلة للتعلم.</p></div><button class="primary-btn" id="uploadToggle">＋ <span data-i18n="newSource">مصدر جديد</span></button></div><div id="sourceComposer" class="composer hidden"><div class="composer-tabs"><button class="tab active" data-tab="file" data-i18n="uploadFile">رفع ملف</button><button class="tab" data-tab="url" data-i18n="addUrl">إضافة رابط</button></div><div id="fileForm"><label class="dropzone"><input type="file" id="fileInput" accept=".pdf,.docx,.doc,.md,.txt,.pptx,.html,.htm"/><span class="upload-icon">↑</span><strong data-i18n="dropFile">اسحب الملف هنا أو اختره</strong><small data-i18n="fileTypes">PDF، DOCX، TXT، Markdown أو HTML</small></label></div><div id="urlForm" class="hidden"><div class="input-row"><input id="urlInput" type="url" placeholder="https://example.com/course"/><button class="primary-btn" id="urlSubmit" data-i18n="indexUrl">فهرسة الرابط</button></div></div><div class="composer-footer"><span id="selectedFile" class="muted"></span><button class="primary-btn" id="fileSubmit" data-i18n="indexFile">فهرسة الملف</button></div></div><div class="panel"><div class="toolbar"><div class="search"><span>⌕</span><input id="sourceSearch" data-i18n-placeholder="searchSources" placeholder="ابحث في المصادر..."/></div><span id="sourceCount" class="muted"></span></div><div id="sourcesList" class="source-list"></div></div></section>
+      <section id="view-jobs" class="view"><div class="page-intro"><div><span class="eyebrow" data-i18n="processingCenter">مركز المعالجة</span><h2 data-i18n="trackJobs">المهام والتحليلات</h2><p data-i18n="trackJobsSub">راقب استخراج المفاهيم وبناء الرسم المعرفي لحظة بلحظة.</p></div><button class="ghost-btn" id="jobsRefresh" data-i18n="refresh">تحديث</button></div><div class="panel"><div class="toolbar"><div class="filter-pills"><button class="filter active" data-filter="all" data-i18n="all">الكل</button><button class="filter" data-filter="processing" data-i18n="processing">قيد المعالجة</button><button class="filter" data-filter="review_required" data-i18n="review">بانتظار المراجعة</button></div></div><div id="jobsList" class="jobs-table"></div></div></section>
+      <section id="view-roadmap" class="view"><div class="page-intro"><div><span class="eyebrow" data-i18n="learningArchitecture">هندسة التعلم</span><h2 data-i18n="learningRoadmap">خارطة التعلم</h2><p data-i18n="learningRoadmapSub">مسار مرتب حسب المتطلبات السابقة، مع دليل المصدر لكل وحدة.</p></div><select id="roadmapSelect" class="select"><option value="" data-i18n="selectSource">اختر مصدراً</option></select></div><div id="roadmapEmpty" class="empty-state"><div class="empty-icon">✦</div><h3 data-i18n="noRoadmap">لا توجد خارطة معروضة</h3><p data-i18n="noRoadmapSub">أكمل مهمة تحليل لمصدر ثم اختره من القائمة.</p></div><div id="roadmapContent" class="hidden"></div></section>
+    </main>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

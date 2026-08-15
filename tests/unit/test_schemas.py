@@ -131,7 +131,7 @@ class TestKnowledgeGraphSchema:
 class TestLearningPathSchema:
     def test_valid_path(self):
         module = LearningModule(
-            order=1, title="مقدمة", learning_objectives=["يشرح"],
+            order=1, module_id="module-1", title="مقدمة", learning_objectives=["يشرح"],
             concepts_covered=["ML"], estimated_hours=1.0,
         )
         path = LearningPath(

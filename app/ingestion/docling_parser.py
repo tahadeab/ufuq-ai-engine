@@ -99,9 +99,9 @@ class DoclingParser(DocumentParser):
 
         file_type = file_path.suffix.lower().lstrip(".")
 
-        # وضع تجريبي للنصوص (MD/TXT) عند عدم توفر Docling —
-        # يحافظ على عمل النظام في CI والأجهزة دون Docling
-        if self._docling is None and file_type in ("md", "txt", "text"):
+        # ملفات النصوص تُحلّل مباشرةً دائماً؛ Docling لا يحتاجها وقد
+        # يرفضها في بعض الإصدارات رغم أن امتداداتها مسموحة في API.
+        if file_type in ("md", "txt", "text"):
             return self._parse_plain_text(file_path, file_type)
 
         if self._docling is None:
@@ -111,6 +111,33 @@ class DoclingParser(DocumentParser):
             )
         result = self._docling.convert(str(file_path))
         dl_doc = result.document
+
+        # بعض إصدارات Docling تعيد عناصر iterate_items ككائنات PictureItem
+        # دون نص قابل للقراءة. تصدير Markdown هو المسار الرسمي الأكثر ثباتاً
+        # للنص والجداول، ويمنع فهرسة تمثيل Python الداخلي للكائنات.
+        if hasattr(dl_doc, "export_to_markdown"):
+            try:
+                markdown = (dl_doc.export_to_markdown() or "").strip()
+                if len(markdown) >= 80:
+                    heading_blocks = []
+                    for line in markdown.splitlines():
+                        stripped = line.strip()
+                        if stripped.startswith("#"):
+                            level = len(stripped) - len(stripped.lstrip("#"))
+                            heading_blocks.append(
+                                HeadingBlock(level=max(0, min(level - 1, 6)), text=stripped.lstrip("# "), page=1)
+                            )
+                    return ParsedDocument(
+                        title=file_path.stem,
+                        file_path=str(file_path),
+                        file_type=file_type,
+                        pages=[PageBlock(page_number=1, text=markdown)],
+                        headings=heading_blocks,
+                        word_count=len(markdown.split()),
+                        metadata={"parser": "docling_markdown"},
+                    )
+            except Exception:
+                logger.exception("فشل تصدير Markdown من Docling؛ استخدام مسار العناصر البديل")
 
         pages: List[PageBlock] = []
         headings: List[HeadingBlock] = []
@@ -130,8 +157,7 @@ class DoclingParser(DocumentParser):
             pass
 
         # المسار الأضمن: traversing blocks
-        from docling.datamodel.base_models import ItemRef
-
+        # لا نعتمد على ItemRef لأن هذا الرمز تغيّر بين إصدارات Docling.
         current_page = 1
         for block in dl_doc.iterate_items():
             block_type = getattr(block, "label", None) or type(block).__name__

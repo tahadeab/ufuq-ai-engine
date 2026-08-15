@@ -75,7 +75,38 @@ class KnowledgeExtractor:
                 else:
                     all_concepts[c.name] = c
 
-        return list(all_concepts.values())
+        if all_concepts:
+            return list(all_concepts.values())
+
+        # Fallback آمن: عند تعذر LLM أو إرجاعه مصفوفة فارغة، نستخرج
+        # عناوين الأقسام من النص نفسه كي لا يتحول المصدر إلى رسم فارغ.
+        # هذه المفاهيم منخفضة الثقة وتبقى قابلة للمراجعة، لكنها تسمح ببناء
+        # Roadmap أولية موثقة بالمقاطع بدلاً من إسقاط المهمة بالكامل.
+        fallback: List[Concept] = []
+        for chunk in chunks:
+            chunk_id = chunk.get("chunk_id", "")
+            text = chunk.get("text", "") or ""
+            candidates = []
+            candidates.extend(re.findall(r"(?m)^#{1,6}\s+([^#\n]{3,100})", text))
+            heading_path = chunk.get("heading_path", "")
+            if heading_path:
+                candidates.extend([x.strip() for x in str(heading_path).split(" > ") if x.strip()])
+            seen = set()
+            for name in candidates:
+                name = re.sub(r"\s+", " ", name).strip(" -*")
+                key = name.lower()
+                if key in seen or not name or len(name.split()) > 14:
+                    continue
+                seen.add(key)
+                fallback.append(Concept(
+                    id=concept_id_from_name(name, self._name_counter),
+                    name=name,
+                    type="topic",
+                    definition=f"موضوع مستخرج من المصدر: {name}",
+                    source_chunk_ids=[chunk_id] if chunk_id else [],
+                    confidence=0.45,
+                ))
+        return fallback
 
     async def _extract_one_chunk(
         self, chunk: Dict[str, Any], document_title: str

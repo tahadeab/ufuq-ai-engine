@@ -67,8 +67,10 @@ class AgentPolicy:
         if task_type == "generate_path":
             return [
                 {"tool": "get_chunks", "description": "الحصول على المقاطع"},
-                {"tool": "build_graph", "description": "إعادة بناء الرسم من الذاكرة"},
-                {"tool": "topological_sort", "description": "الترتيب الطوبولوجي"},
+                {"tool": "extract_concepts", "description": "استخراج المفاهيم من المقاطع"},
+                {"tool": "extract_relationships", "description": "استخراج العلاقات بين المفاهيم"},
+                {"tool": "build_graph", "description": "بناء الرسم المعرفي والتحقق"},
+                {"tool": "topological_sort", "description": "الترتيب الطوبولوجي الحتمي"},
                 {"tool": "generate_learning_path", "description": "توليد مسار التعلم"},
             ]
         return []

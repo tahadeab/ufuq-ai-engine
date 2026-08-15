@@ -77,12 +77,22 @@ class BGE_M3_Embedding(EmbeddingModel):
                 "ثم حمّل النموذج: python -c 'from sentence_transformers import "
                 "SentenceTransformer; SentenceTransformer(\"BAAI/bge-m3\")'"
             )
-        vectors = self._model.encode(
-            texts,
-            normalize_embeddings=True,
-            show_progress_bar=len(texts) > 50,
-        )
-        return np.asarray(vectors, dtype=np.float32)
+        if not texts:
+            return np.empty((0, self.dim), dtype=np.float32)
+
+        # التضمين على دفعات يمنع تحميل جميع صفحات PDF في الذاكرة دفعة واحدة.
+        batch_size = get_settings().embedding_batch_size
+        batches = []
+        for start in range(0, len(texts), batch_size):
+            batch = texts[start:start + batch_size]
+            encoded = self._model.encode(
+                batch,
+                batch_size=min(batch_size, len(batch)),
+                normalize_embeddings=True,
+                show_progress_bar=False,
+            )
+            batches.append(np.asarray(encoded, dtype=np.float32))
+        return np.concatenate(batches, axis=0)
 
     def _hash_embed(self, texts: List[str]) -> np.ndarray:
         """تمثيل تجريبي (hash-based TF) لوضع CI فقط — لا يستخدم في الإنتاج."""

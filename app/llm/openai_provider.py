@@ -56,7 +56,19 @@ class OpenAIProvider(LLMProvider):
                 json=payload,
                 headers=headers,
             )
-            resp.raise_for_status()
+            if resp.is_error:
+                try:
+                    detail: Any = resp.json()
+                except ValueError:
+                    detail = resp.text[:2000]
+                logger.error(
+                    "LLM request failed status=%s model=%s endpoint=%s detail=%s",
+                    resp.status_code,
+                    self.model,
+                    f"{self.base_url.rstrip('/')}/chat/completions",
+                    detail,
+                )
+                resp.raise_for_status()
             return resp.json()
 
     async def generate(
@@ -87,7 +99,16 @@ class OpenAIProvider(LLMProvider):
             data = await self._chat_completion(
                 messages,
                 temperature=temperature,
-                extra_body={"response_format": {"type": "json_object"}},
+                extra_body={
+                    "response_format": {
+                        "type": "json_schema",
+                        "json_schema": {
+                            "name": "structured_output",
+                            "strict": True,
+                            "schema": schema,
+                        },
+                    }
+                },
             )
             raw_content = data["choices"][0].get("message", {}).get("content", "{}")
             try:

@@ -26,7 +26,8 @@ import time
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
 
@@ -67,6 +68,7 @@ app.include_router(jobs_router)
 app.include_router(sources_router)
 app.include_router(rag_router)
 app.include_router(knowledge_router)
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
 @app.middleware("http")
@@ -113,10 +115,6 @@ async def health() -> dict:
     return status
 
 
-@app.get("/")
-async def root() -> dict:
-    return {
-        "name": "Ufuq AI Engine",
-        "version": "0.1.0",
-        "docs": "/docs",
-    }
+@app.get("/", include_in_schema=False)
+async def root():
+    return FileResponse("app/static/index.html")

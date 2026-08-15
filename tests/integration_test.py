@@ -21,7 +21,9 @@ client = TestClient(app)
 def test_root():
     r = client.get("/")
     assert r.status_code == 200
-    assert r.json()["name"] == "Ufuq AI Engine"
+    assert "Ufuq AI Engine" in r.text
+    assert "app.js" in r.text
+    assert "app.css" in r.text
 
 
 def test_health():

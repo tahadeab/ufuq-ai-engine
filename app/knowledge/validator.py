@@ -88,3 +88,37 @@ def check_duplicate_concepts(concepts: List[Dict[str, Any]]) -> List[str]:
         if seen[norm] > 1:
             issues.append(f"مفهوم مكرر (بعد التطبيع): {c.get('name')}")
     return issues
+
+
+class CitationValidator:
+    """تحقق حتمي من استشهادات الوحدات التعليمية."""
+
+    def __init__(self, chunks: List[Dict[str, Any]], source_id: str):
+        self.source_id = source_id
+        self.chunks = {str(c.get("chunk_id")): c for c in chunks if c.get("chunk_id")}
+
+    def validate(self, learning_path: Dict[str, Any]) -> List[str]:
+        issues: List[str] = []
+        for module in learning_path.get("modules", []):
+            citations = module.get("source_citations") or []
+            if not citations:
+                issues.append(f"module {module.get('module_id', module.get('order'))} بلا استشهاد")
+                continue
+            for citation in citations:
+                if citation.get("source_id") != self.source_id:
+                    issues.append(f"مصدر غير صحيح في module {module.get('module_id')}")
+                chunk_id = str(citation.get("chunk_id", ""))
+                chunk = self.chunks.get(chunk_id)
+                if chunk is None:
+                    issues.append(f"مقطع غير موجود: {chunk_id}")
+                    continue
+                quote = (citation.get("quote") or "").strip()
+                text = str(chunk.get("text") or chunk.get("content") or "")
+                if not quote or quote not in text:
+                    issues.append(f"اقتباس غير مطابق للمقطع: {chunk_id}")
+        return issues
+
+    def assert_valid(self, learning_path: Dict[str, Any]) -> None:
+        issues = self.validate(learning_path)
+        if issues:
+            raise ValueError("Citation validation failed: " + "; ".join(issues))

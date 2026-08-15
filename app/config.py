@@ -76,6 +76,7 @@ class Settings(BaseSettings):
     embedding_model: str = "BAAI/bge-m3"
     embedding_dim: int = 1024
     embedding_device: str = "auto"  # auto | cpu | cuda
+    embedding_batch_size: int = Field(default=8, ge=1, le=128)
 
     # ────────────────────────────────
     # Vector Store (Qdrant)
